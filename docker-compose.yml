@@ -1,81 +1,38 @@
-version: '3.8'
-
 services:
+  # Chess AI Backend
   backend:
     build:
-      context: ./backend
+      context: ./back
       dockerfile: Dockerfile
+    container_name: chess-ai-backend
     ports:
       - "8080:8080"
     environment:
       - PORT=8080
     networks:
       - chess-network
+    restart: unless-stopped
     healthcheck:
-      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:8080/api/game"]
+      test: ["CMD", "curl", "--quiet", "--tries=1", "--spider", "http://localhost:8080/health"]
       interval: 30s
       timeout: 10s
       retries: 3
+      start_period: 20s
 
+  # React Frontend
   frontend:
     build:
-      context: ./frontend
+      context: ./front
       dockerfile: Dockerfile
+    container_name: chess-ai-frontend
     ports:
       - "3000:3000"
     environment:
-      - REACT_APP_API_URL=http://localhost:8080
+      - VITE_API_URL=http://localhost:8080
+      - VITE_BACKEND_URL=http://backend:8080
     depends_on:
-      - backend
-    networks:
-      - chess-network
-
-networks:
-  chess-network:
-    driver: bridge
-
-# For production deployment with reverse proxy
----
-version: '3.8'
-
-services:
-  backend:
-    build:
-      context: ./backend
-      dockerfile: Dockerfile
-    expose:
-      - "8080"
-    environment:
-      - PORT=8080
-    networks:
-      - chess-network
-    restart: unless-stopped
-
-  frontend:
-    build:
-      context: ./frontend
-      dockerfile: Dockerfile.prod
-    expose:
-      - "80"
-    environment:
-      - REACT_APP_API_URL=http://backend:8080
-    depends_on:
-      - backend
-    networks:
-      - chess-network
-    restart: unless-stopped
-
-  nginx:
-    image: nginx:alpine
-    ports:
-      - "80:80"
-      - "443:443"
-    volumes:
-      - ./nginx.conf:/etc/nginx/nginx.conf
-      - ./ssl:/etc/nginx/ssl
-    depends_on:
-      - frontend
-      - backend
+      backend:
+        condition: service_healthy
     networks:
       - chess-network
     restart: unless-stopped
