@@ -1,0 +1,166 @@
+
+
+function validMove(x: number, y: number, toX: number, toY: number, board: ChessBoardProps, isWhiteTurn: boolean): boolean {
+  if (x === toX && y === toY) return false;
+  if (board.squares[y][x].isLight !== isWhiteTurn) return false;
+  if (board.squares[y][x].piece === null) return false;
+  if (board.squares[y][x].piece && board.squares[toY][toX].piece && board.squares[y][x].isLight === board.squares[toY][toX].isLight) return false;
+  if (board.squares[y][x].piece === faChessPawn && board.squares[y][x].isLight) {
+    if (!(toY === y-2 && y === 6)) if (toY !== y-1 || Math.abs(toX-x)>1) return false;
+    console.log('bruh', toY, y);
+    if (x === toX && board.squares[toY][toX].piece !== null) return false;
+    if (x !== toX && (board.squares[toY][toX].isLight || !board.squares[toY][toX].piece)) return false;
+  }
+  if (board.squares[y][x].piece === faChessPawn && !board.squares[y][x].isLight) {
+    if (!(toY === y+2 && y === 1)) if (toY !== y+1 || Math.abs(toX-x)>1) return false;
+    if (x === toX && board.squares[toY][toX].piece !== null) return false;
+    if (x !== toX && !board.squares[toY][toX].isLight) return false;
+  }
+  if (board.squares[y][x].piece === faChessRook) {
+    if (toY !== y && toX !== x) return false;
+    for (let i = Math.min(x, toX) + 1; i < Math.max(x, toX); ++i) 
+      if (board.squares[toY][i].piece !== null) return false;
+    for (let i = Math.min(y, toY) + 1; i < Math.max(y, toY); ++i) 
+      if (board.squares[i][toX].piece !== null) return false;
+    if (board.squares[toY][toX].isLight === board.squares[y][x].isLight && board.squares[toY][toX].piece !== null) return false;
+  }
+  if (board.squares[y][x].piece === faChessKnight) {
+    if (board.squares[toY][toX].isLight === board.squares[y][x].isLight && board.squares[toY][toX].piece !== null) return false;
+    if (!((Math.abs(toX-x) === 1 && Math.abs(toY-y) === 2) || (Math.abs(toX-x) === 2 && Math.abs(toY-y) === 1))) return false;
+  }
+  if (board.squares[y][x].piece === faChessBishop) {
+    if (board.squares[toY][toX].isLight === board.squares[y][x].isLight && board.squares[toY][toX].piece !== null) return false;
+    if (Math.abs(x-toX) !== Math.abs(y-toY)) return false;
+    for (let i = 1; i < Math.abs(x - toX); ++i) { 
+      let incX = (x < toX) ? 1 : -1;
+      let incY = (y < toY) ? 1 : -1;
+      if (board.squares[y + (incY * i)][x + (incX * i)].piece !== null) return false;
+    }
+  }
+  if (board.squares[y][x].piece === faChessQueen) {
+    if (board.squares[toY][toX].isLight === board.squares[y][x].isLight && board.squares[toY][toX].piece !== null) return false;
+    if (Math.abs(x-toX) !== Math.abs(y-toY) && !((x !== toX && y === toY) || (x === toX && y !== toY))) return false;
+    if (Math.abs(x-toX) === Math.abs(y-toY)) {
+      for (let i = 1; i < Math.abs(x - toX); ++i) { 
+        let incX = (x < toX) ? 1 : -1;
+        let incY = (y < toY) ? 1 : -1;
+        if (board.squares[y + (incY * i)][x + (incX * i)].piece !== null) return false;
+      }
+    }
+    if ((x !== toX && y === toY) || (x === toX && y !== toY)) {
+      for (let i = Math.min(x, toX) + 1; i < Math.max(x, toX); ++i) 
+        if (board.squares[toY][i].piece !== null) return false;
+      for (let i = Math.min(y, toY) + 1; i < Math.max(y, toY); ++i) 
+        if (board.squares[i][toX].piece !== null) return false;
+    }
+  }
+  if (board.squares[y][x].piece === faChessKing) {
+    if (board.squares[toY][toX].isLight === board.squares[y][x].isLight && board.squares[toY][toX].piece !== null) return false;
+    if (Math.abs(x-toX) > 1 || Math.abs(y-toY) > 1) return false;
+    if (!Math.abs(x-toX) && !Math.abs(y-toY)) return false;
+  }
+  return true;
+}
+
+function isKingSafe(isWhiteTurn: boolean, board: ChessBoardProps): boolean {
+  let kingX, kingY;
+  for (let i=0; i<8; ++i) for (let j=0; j<8; ++j) {
+    if (board.squares[i][j].piece === faChessKing && board.squares[i][j].isLight === isWhiteTurn) {
+      kingX = i;
+      kingY = j;
+    }
+  }
+  let x = kingX;
+  let y = kingY;
+
+  //rooks
+  --x;
+  while (x>=0) {
+    if (board.squares[x][y].piece === faChessRook && board.squares[x][y].isLight !== isWhiteTurn) return false;
+    if (board.squares[x][y].piece !== null) break;
+    --x;
+  }
+  x = kingX;
+  ++x;
+  while (x<8) {
+    if (board.squares[x][y].piece === faChessRook && board.squares[x][y].isLight !== isWhiteTurn) return false;
+    if (board.squares[x][y].piece !== null) break;
+    ++x;
+  }
+  x = kingX;
+  --y;
+  while (y>=0) {
+    if (board.squares[x][y].piece === faChessRook && board.squares[x][y].isLight !== isWhiteTurn) return false;
+    if (board.squares[x][y].piece !== null) break;
+    --y;
+  }
+  y = kingY;
+  ++y;
+  while (y<8) {
+    if (board.squares[x][y].piece === faChessRook && board.squares[x][y].isLight !== isWhiteTurn) return false;
+    if (board.squares[x][y].piece !== null) break;
+    ++y;
+  }
+  y = kingY;
+  //bishops
+  --x;
+  --y;
+  while (x>=0 && y>=0) {
+    if (board.squares[x][y].piece === faChessBishop && board.squares[x][y].isLight !== isWhiteTurn) return false;
+    if (board.squares[x][y].piece !== null) break;
+    --x;
+    --y;
+  }
+  x = kingX;
+  y = kingY;
+  ++x;
+  ++y;
+  while (x<8 && y<8) {
+    if (board.squares[x][y].piece === faChessBishop && board.squares[x][y].isLight !== isWhiteTurn) return false;
+    if (board.squares[x][y].piece !== null) break;
+    ++x;
+    ++y;
+  }
+  x = kingX;
+  y = kingY;
+  --x;
+  ++y;
+  while (x>=0 && y<8) {
+    if (board.squares[x][y].piece === faChessBishop && board.squares[x][y].isLight !== isWhiteTurn) return false;
+    if (board.squares[x][y].piece !== null) break;
+    --x;
+    ++y;
+  }
+  x = kingX;
+  y = kingY;
+  ++x;
+  --y;
+  while (y>=0 && x<8) {
+    if (board.squares[x][y].piece === faChessRook && board.squares[x][y].isLight !== isWhiteTurn) return false;
+    if (board.squares[x][y].piece !== null) break;
+    ++x;
+    --y;
+  }
+  x = kingX;
+  y = kingY;
+  //knight todo
+  for (let i=0; i<8; ++i) for (let j=0; j<8; ++j) 
+    if (board.squares[i][j].piece === faChessKnight && board.squares[i][j].isLight !== isWhiteTurn) 
+      if ((Math.abs(i - kingX) === 1 && Math.abs(j - kingY) === 2) || (Math.abs(i - kingX) === 2 && Math.abs(j - kingY) === 1)) return false;
+  //pawns
+  if (isWhiteTurn) {
+    if (x>0 && y<7 && board.squares[x-1][y+1].piece === faChessPawn && board.squares[x-1][y+1].isLight === !isWhiteTurn) return false;
+    if (x>0 && y>0 && board.squares[x-1][y-1].piece === faChessPawn && board.squares[x-1][y+1].isLight === !isWhiteTurn) return false;
+  }
+  if (!isWhiteTurn) {
+    if (x<7 && y<7 && board.squares[x+1][y+1].piece === faChessPawn && board.squares[x+1][y+1].isLight === !isWhiteTurn) return false;
+    if (x<7 && y>0 && board.squares[x+1][y-1].piece === faChessPawn && board.squares[x+1][y+1].isLight === !isWhiteTurn) return false;
+  }
+  //other king
+  for (let i=0; i<8; ++i) for (let j=0; j<8; ++j) {
+    if (board.squares[i][j].piece === faChessKing && board.squares[i][j].isLight !== isWhiteTurn) {
+      if (Math.max(Math.abs(i-kingX), Math.abs(j-kingY)) <= 1) return false;
+    }
+  }
+  return true;
+}
