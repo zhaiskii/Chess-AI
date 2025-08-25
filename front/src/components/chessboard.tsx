@@ -214,7 +214,7 @@ export function ChessBoard() {
     <div className="flex flex-col justify-center items-center w-screen h-screen bg-gray-100 p-4">
       {/* Game Status */}
       <div className="mb-4 text-center">
-        <div className="text-2xl font-bold mb-2">Chess AI V3</div>
+        <div className="text-2xl font-bold mb-2">Chess AI</div>
         <div className="text-lg mb-2">
           Turn:{" "}
           <span className="font-semibold">
