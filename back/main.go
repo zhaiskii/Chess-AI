@@ -13,6 +13,7 @@ func main() {
 	chessService := NewChessService()
 	aiService := NewAIService()
 	handlers := NewHandlers(chessService, aiService)
+	log.Println("Hello2");
 
 	r := mux.NewRouter()
 
@@ -22,9 +23,11 @@ func main() {
 	r.HandleFunc("/health", handlers.Health).Methods("GET")
 
 	api := r.PathPrefix("/api").Subrouter()
+	
+	api.Use(corsMiddleware)
 
 	api.HandleFunc("/game", handlers.GetGameState).Methods("GET")
-	api.HandleFunc("/move", handlers.MakeMove).Methods("POST")
+	api.HandleFunc("/move", handlers.MakeMove).Methods("POST", "OPTIONS")
 	api.HandleFunc("/new-game", handlers.NewGame).Methods("POST")
 	api.HandleFunc("/valid-moves", handlers.GetValidMoves).Methods("GET")
 
@@ -52,21 +55,27 @@ func main() {
 
 func corsMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		//fix that later
-		origin := r.Header.Get("Origin")
-		if origin == "" {
-			origin = "*"
-		}
-		
-		w.Header().Set("Access-Control-Allow-Origin", origin)
-		w.Header().Set("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS")
-		w.Header().Set("Access-Control-Allow-Headers", "Content-Type, Authorization")
-		w.Header().Set("Access-Control-Allow-Credentials", "true")
-		
 		if r.Method == "OPTIONS" {
+			w.Header().Set("Access-Control-Allow-Origin", "http://localhost:3000")
+			w.Header().Set("Access-Control-Allow-Credentials", "true")
+			w.Header().Set("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS")
+			w.Header().Set("Access-Control-Allow-Headers", "Content-Type, Authorization")
 			w.WriteHeader(http.StatusOK)
 			return
 		}
+
+		//fix that later
+
+		log.Printf("request %s", r.URL.Path);
+
+		origin := r.Header.Get("Origin")
+		if origin == "http://localhost:3000" {
+			w.Header().Set("Access-Control-Allow-Origin", origin)
+            w.Header().Set("Access-Control-Allow-Credentials", "true")
+		}
+		
+		w.Header().Set("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS")
+		w.Header().Set("Access-Control-Allow-Headers", "Content-Type, Authorization")
 		
 		next.ServeHTTP(w, r)
 	})
