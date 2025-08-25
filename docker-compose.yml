@@ -12,12 +12,6 @@ services:
     networks:
       - chess-network
     restart: unless-stopped
-    healthcheck:
-      test: ["CMD", "curl", "--quiet", "--tries=1", "--spider", "http://localhost:8080/health"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-      start_period: 20s
 
   # React Frontend
   frontend:
@@ -31,8 +25,7 @@ services:
       - VITE_API_URL=http://localhost:8080
       - VITE_BACKEND_URL=http://backend:8080
     depends_on:
-      backend:
-        condition: service_healthy
+      - backend
     networks:
       - chess-network
     restart: unless-stopped
