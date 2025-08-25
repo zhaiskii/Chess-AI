@@ -26,4 +26,4 @@ open the http://localhost:3000 on the browser to play the game
 and enjoy the game!
 
 
-<img width="1848" height="1033" alt="image" src="https://github.com/user-attachments/assets/58aeec38-9a91-4340-aaa4-b860641e54bc" />
+<img width="1846" height="951" alt="image" src="https://github.com/user-attachments/assets/72036200-30d2-4684-a523-0cf1a750b641" />
