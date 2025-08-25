@@ -55,6 +55,18 @@ func (h *Handlers) Health(w http.ResponseWriter, r *http.Request) {
 	h.writeJSON(w, response)
 }
 
+func (h *Handlers) ChangeDepth(w http.ResponseWriter, r *http.Request) {
+	var depthReq ChangeDepthRequest
+	if err := json.NewDecoder(r.Body).Decode(&depthReq); err != nil {
+		h.writeError(w, "Invalid JSON format", http.StatusBadRequest, err.Error())
+		return
+	}
+
+	h.aiService.SetDepth(depthReq.Depth)
+
+	log.Printf("Depth change: %+v", depthReq)
+}
+
 // ============================================================================
 // GAME STATE ENDPOINTS
 // ============================================================================

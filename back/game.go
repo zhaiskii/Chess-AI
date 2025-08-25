@@ -51,6 +51,10 @@ type MoveRequest struct {
 	To   Position `json:"to"`
 }
 
+type ChangeDepthRequest struct {
+	Depth int `json:"depth"`
+}
+
 type GameResponse struct {
 	Board       [][]Square `json:"board"`
 	IsGameOver  bool       `json:"isGameOver"`

@@ -30,6 +30,7 @@ func main() {
 	api.HandleFunc("/move", handlers.MakeMove).Methods("POST", "OPTIONS")
 	api.HandleFunc("/new-game", handlers.NewGame).Methods("POST")
 	api.HandleFunc("/valid-moves", handlers.GetValidMoves).Methods("GET")
+	api.HandleFunc("/change-depth", handlers.ChangeDepth).Methods("POST", "OPTIONS")
 
 	api.HandleFunc("/ai/move", handlers.ForceAIMove).Methods("POST")
 	api.HandleFunc("/ai/stats", handlers.GetAIStats).Methods("GET")
@@ -47,6 +48,7 @@ func main() {
 	log.Printf("   POST /api/move")
 	log.Printf("   POST /api/new-game")
 	log.Printf("   POST /api/ai/move")
+	log.Printf("   POST /api/change-depth");
 	
 	if err := http.ListenAndServe(":"+port, r); err != nil {
 		log.Fatal("Server failed to start:", err)
